@@ -28,7 +28,7 @@ function AppHeader() {
             <div>
                 <ul className='text-lg flex justify-around gap-7 '>
                     {MenuOptions.map((option, index)=>(
-                        <li className="transition-transform hover:scale-105 cursor-pointer">{option.name}</li>
+                        <li key={index} className="transition-transform hover:scale-105 cursor-pointer">{option.name}</li>
                     ))}
                 </ul>
             </div>
