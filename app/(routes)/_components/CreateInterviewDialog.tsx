@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { Button } from "@/components/ui/button"
 import {
     Dialog,
@@ -14,6 +14,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import ResumeUpload from './ResumeUpload'
 import JobDescription from './JobDescription'
 import axios from 'axios'
+import { Loader2Icon } from 'lucide-react'
+import { useMutation } from 'convex/react'
+import { api } from '@/convex/_generated/api'
+import { UserDetailcontext } from '@/context/UserDetailContext'
 function CreateInterviewDialog() {
 
     const [formData, setFormData]=useState<any>();
@@ -25,15 +29,23 @@ function CreateInterviewDialog() {
     }
     const [file, setFile]=useState<File|null>();
     const [loading, setLoading] = useState(false);
+    const saveInterviewQuestions=useMutation(api.Interview.saveInterviewQuestions);
+    const {userDetail, setUserDetail}=useContext(UserDetailcontext);
     const onSubmit = async()=>{
-        if(!file)return;
         setLoading(true);
-        const formData = new FormData();
-        formData.append('file', file);
+        const _formData = new FormData();
+        _formData.append('file', file??'');
+        _formData.append('jobDescription', formData?.jobDescription);
+        _formData.append('jobTitle', formData?.jobTitle);
         try {
             const res = await axios.post('api/generate-interview-questions', formData);
             console.log(res.data);
-            
+            const response = await saveInterviewQuestions({
+                questions:res.data?.questions,
+                resumeUrl:res.data?.resumeUrl??'',
+                uid:userDetail?._id
+            });
+            console.log(response);
         } catch (error) {
             console.log(error);
         }finally{
@@ -63,7 +75,10 @@ function CreateInterviewDialog() {
                     <DialogClose>
                         <Button variant={'ghost'}>Cancel</Button>
                     </DialogClose>
-                    <Button onClick={onSubmit} disabled={loading || !file}>Submit</Button>
+                    <Button onClick={onSubmit} disabled={loading || (!file && !formData?.jobDescription && !formData?.jobTitle)}>
+                        {loading && <Loader2Icon className='mr-2 h-4 w-4 animate-spin' />}
+                        Submit
+                    </Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

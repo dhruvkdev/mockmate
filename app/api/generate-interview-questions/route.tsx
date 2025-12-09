@@ -1,50 +1,113 @@
 import { NextRequest, NextResponse } from "next/server";
 import ImageKit from "imagekit";
-import axios from 'axios';
 
 var imagekit = new ImageKit({
-    publicKey : process.env.IMAGEKIT_PUBLIC_KEY as string,
-    privateKey : process.env.IMAGEKIT_PRIVATE_KEY as string,
-    urlEndpoint : process.env.IMAGEKIT_URL_ENDPOINT as string,
+    publicKey: process.env.IMAGEKIT_PUBLIC_KEY as string,
+    privateKey: process.env.IMAGEKIT_PRIVATE_KEY as string,
+    urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT as string,
 });
 
 export async function POST(req: NextRequest) {
-    try {
-        const formData = await req.formData();
-        const file = formData.get('file') as File | null;
+    console.log(`🚨 API HIT at: ${new Date().toISOString()}`);
 
-        if(!file) {
-            return NextResponse.json({ error: "No file provided" }, { status: 400 });
+    try {
+        const contentType = req.headers.get("content-type") || "";
+        
+        let file: File | null = null;
+        let jobTitle = "";
+        let jobDescription = "";
+
+        // 1. Determine how to parse the request (JSON vs FormData)
+        if (contentType.includes("multipart/form-data")) {
+            const formData = await req.formData();
+            file = formData.get('file') as File | null;
+            jobTitle = formData.get('jobTitle') as string || "";
+            jobDescription = formData.get('jobDescription') as string || "";
+        } else {
+            // Assume JSON if it's not form-data
+            const body = await req.json();
+            jobTitle = body.jobTitle;
+            jobDescription = body.jobDescription;
         }
 
-        const bytes = await file.arrayBuffer();
-        const buffer = Buffer.from(bytes);
+        // 2. Scenario A: File is provided (Upload -> n8n)
+        if (file) {
+            const bytes = await file.arrayBuffer();
+            const buffer = Buffer.from(bytes);
 
-        // 1. Upload to ImageKit
-        const uploadPdf = await imagekit.upload({
-            file: buffer,
-            fileName: Date.now().toString() + ".pdf", // Fixed: Added () to Date.now
-            isPublished: true
-        });
+            // Upload to ImageKit
+            const uploadPdf = await imagekit.upload({
+                file: buffer,
+                fileName: Date.now().toString() + ".pdf",
+                isPublished: true
+            });
 
-        // 2. Call n8n Webhook
-        // Note: I recommend using the TEST URL while debugging (see Part 2 below)
-        const result = await axios.post('https://n8n-xc2y.onrender.com/webhook/get-interview-questions', {
-            resumeURL: uploadPdf.url
-        });
+            console.log("Sending to n8n with URL:", uploadPdf.url);
 
-        console.log("n8n Response:", result.data);
+            // Call n8n
+            const response = await fetch('https://n8n-xc2y.onrender.com/webhook-test/get-interview-questions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    resumeURL: uploadPdf.url,
+                    jobTitle: jobTitle,       // Pass these if needed
+                    jobDescription: jobDescription 
+                })
+            });
 
-        // 3. Return the Final Response
-        return NextResponse.json(result.data);
+            const responseText = await response.text();
+            let data;
+            try {
+                data = JSON.parse(responseText);
+            } catch (e) {
+                data = { error: "Invalid JSON response from n8n", raw: responseText };
+            }
+
+            // Return Final Response
+            return NextResponse.json({
+                questions: data?.output?.[0]?.content?.[0]?.text?.interview_questions || [],
+                resumeUrl: uploadPdf.url
+            });
+        } 
+        
+        // 3. Scenario B: No File (Direct Text -> n8n)
+        else {
+            console.log("Sending text-only request to n8n");
+            
+            const response = await fetch('https://n8n-xc2y.onrender.com/webhook-test/get-interview-questions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    resumeURL: null,
+                    jobDescription: jobDescription,
+                    jobTitle: jobTitle
+                })
+            });
+
+            const responseText = await response.text();
+            let data;
+            try {
+                data = JSON.parse(responseText);
+            } catch (e) {
+                console.error("Failed to parse n8n response:", responseText);
+                data = {};
+            }
+
+            return NextResponse.json({
+                questions: data?.output?.[0]?.content?.[0]?.text?.interview_questions || [],
+                resumeUrl: null
+            });
+        }
 
     } catch (error: any) {
         console.error("Server Error:", error.message);
-        
-        // CRITICAL FIX: You must return a JSON response even if it fails!
         return NextResponse.json(
-            { error: error.message || "Something went wrong" }, 
-            { status: 500 } // Send a 500 status code so the frontend knows it failed
+            { error: error.message || "Something went wrong" },
+            { status: 500 }
         );
     }
 }
