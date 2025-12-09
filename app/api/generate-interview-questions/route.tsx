@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import ImageKit from "imagekit";
+import aj from "@/utils/arcjet";
+import { currentUser } from "@clerk/nextjs/server";
 
 var imagekit = new ImageKit({
     publicKey: process.env.IMAGEKIT_PUBLIC_KEY as string,
@@ -12,10 +14,17 @@ export async function POST(req: NextRequest) {
 
     try {
         const contentType = req.headers.get("content-type") || "";
-        
+        const user=await currentUser();
         let file: File | null = null;
         let jobTitle = "";
         let jobDescription = "";
+        const decision = await aj.protect(req, { requested: 5 }); // Deduct 5 tokens from the bucket
+        console.log("Arcjet decision", decision);
+
+        //@ts-ignore
+        if(decision?.reason?.remaining===0){
+            return NextResponse.json({ error: "No free tokens left. Try again after 24 Hours or upgrade your plan" }, { status: 429 });
+        }
 
         // 1. Determine how to parse the request (JSON vs FormData)
         if (contentType.includes("multipart/form-data")) {
@@ -53,7 +62,7 @@ export async function POST(req: NextRequest) {
                 body: JSON.stringify({
                     resumeURL: uploadPdf.url,
                     jobTitle: jobTitle,       // Pass these if needed
-                    jobDescription: jobDescription 
+                    jobDescription: jobDescription
                 })
             });
 
@@ -68,15 +77,16 @@ export async function POST(req: NextRequest) {
             // Return Final Response
             return NextResponse.json({
                 questions: data?.output?.[0]?.content?.[0]?.text?.interview_questions || [],
-                resumeUrl: uploadPdf.url
+                resumeUrl: uploadPdf.url,
+                status:200
             });
-        } 
-        
+        }
+
         // 3. Scenario B: No File (Direct Text -> n8n)
         else {
             console.log("Sending text-only request to n8n");
-            
-            const response = await fetch('https://n8n-xc2y.onrender.com/webhook-test/get-interview-questions', {
+
+            const response = await fetch('https://n8n-xc2y.onrender.com/webhook/get-interview-questions', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -99,7 +109,8 @@ export async function POST(req: NextRequest) {
 
             return NextResponse.json({
                 questions: data?.output?.[0]?.content?.[0]?.text?.interview_questions || [],
-                resumeUrl: null
+                resumeUrl: null,
+                staus:200
             });
         }
 

@@ -18,6 +18,8 @@ import { Loader2Icon } from 'lucide-react'
 import { useMutation } from 'convex/react'
 import { api } from '@/convex/_generated/api'
 import { UserDetailcontext } from '@/context/UserDetailContext'
+import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 function CreateInterviewDialog() {
 
     const [formData, setFormData]=useState<any>();
@@ -31,6 +33,7 @@ function CreateInterviewDialog() {
     const [loading, setLoading] = useState(false);
     const saveInterviewQuestions=useMutation(api.Interview.saveInterviewQuestions);
     const {userDetail, setUserDetail}=useContext(UserDetailcontext);
+    const router = useRouter();
     const onSubmit = async()=>{
         setLoading(true);
         const _formData = new FormData();
@@ -40,12 +43,16 @@ function CreateInterviewDialog() {
         try {
             const res = await axios.post('api/generate-interview-questions', formData);
             console.log(res.data);
+            if(res?.data?.status == 429){
+                toast.warning(res.data.result);
+                return ;
+            }
             const response = await saveInterviewQuestions({
                 questions:res.data?.questions,
                 resumeUrl:res.data?.resumeUrl??'',
                 uid:userDetail?._id
             });
-            console.log(response);
+            router.push(`/interview/${response}`);
         } catch (error) {
             console.log(error);
         }finally{
