@@ -20,7 +20,7 @@ const aj = arcjet({
     // Create a fixed window rate limit.
     fixedWindow({
       mode: "LIVE",
-      window: "24h", // 24 hour window
+      window: "10s", // 24 hour window
       max: 2, // 2 requests per window
     }),
   ],
