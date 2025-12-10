@@ -3,18 +3,18 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { UserButton } from '@clerk/nextjs'
 
-const MenuOptions=[
+const MenuOptions = [
     {
-        name:'Dashboard',
-        path:'/dashboard'
+        name: 'Dashboard',
+        path: '/dashboard'
     },
     {
-        name:'Upgrade',
-        path:'/upgrade'
+        name: 'Upgrade',
+        path: '/upgrade'
     },
     {
-        name:'How it works?',
-        path:'/how-it-works'
+        name: 'How it works?',
+        path: '/how-it-works'
     },
 ]
 
@@ -31,12 +31,14 @@ function AppHeader() {
             </Link>
             <div>
                 <ul className='text-lg flex justify-around gap-7 '>
-                    {MenuOptions.map((option, index)=>(
-                        <li key={index} className="transition-transform hover:scale-105 cursor-pointer">{option.name}</li>
+                    {MenuOptions.map((option, index) => (
+                        <Link key={index} href={option.path}>
+                            <li className="transition-transform hover:scale-105 cursor-pointer">{option.name}</li>
+                        </Link>
                     ))}
                 </ul>
             </div>
-            <UserButton/>
+            <UserButton />
         </nav>
 
     )
