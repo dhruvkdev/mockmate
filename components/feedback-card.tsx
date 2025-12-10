@@ -6,6 +6,7 @@ import {
     CardTitle,
 } from "@/components/ui/card"
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 
 interface FeedbackCardProps {
     item: any;
@@ -34,10 +35,11 @@ function FeedbackCard({ item, index }: FeedbackCardProps) {
                         <CardTitle>{item.question}</CardTitle>
                     </CardHeader>
                     <CardContent className='flex flex-col gap-4 p-5 h-[calc(100%-80px)] overflow-y-auto'>
-                        <div className='flex justify-start gap-2 items-center'>
+                        <div className='flex justify-between items-center'>
                             <h2 className={cn('text-red-500 p-2 border rounded-lg',
                                 Number(item.rating) >= 5 && 'text-green-500 bg-green-50/20'
                             )}><strong>Rating:</strong> {item.rating}</h2>
+                            <Button size="sm" variant="outline">Feedback</Button>
                         </div>
                         <div className={cn('p-2 border rounded-lg bg-red-50 text-sm text-red-900',
                             Number(item.rating) >= 5 && 'bg-green-50 text-green-900'
