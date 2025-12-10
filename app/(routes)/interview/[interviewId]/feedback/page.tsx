@@ -3,15 +3,12 @@ import { api } from '@/convex/_generated/api';
 import { useConvex, useMutation } from 'convex/react';
 import { useParams, useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
-import {
-    Collapsible,
-    CollapsibleContent,
-    CollapsibleTrigger,
-} from "@/components/ui/collapsible"
-import { ChevronsUpDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import axios from 'axios';
+import FeedbackChart from '@/components/feedback-chart';
+import FeedbackCard from '@/components/feedback-card';
 
 function Feedback() {
     const { interviewId } = useParams();
@@ -92,34 +89,26 @@ function Feedback() {
 
             {/* Overall Rating Calculation (Optional) */}
             {feedbackList?.[0]?.rating &&
-                <h2 className='text-primary text-lg my-3'>
-                    Your overall interview rating: <strong>
-                        {(feedbackList.reduce((acc, item) => acc + (Number(item.rating) || 0), 0) / feedbackList.length).toFixed(1)}
-                        /10</strong>
-                </h2>
+                <div className='w-full'>
+                    <h2 className='text-primary text-lg my-3'>
+                        Your overall interview rating: <strong>
+                            {(feedbackList.reduce((acc, item) => acc + (Number(item.rating) || 0), 0) / feedbackList.length).toFixed(1)}
+                            /10</strong>
+                    </h2>
+
+                    <FeedbackChart feedbackList={feedbackList} />
+                </div>
             }
 
             <h2 className='text-sm text-gray-500'>Find below interview question with correct answer, Your answer and feedback for improvement</h2>
 
-            <div className='mt-5'>
+            <div className='mt-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5'>
                 {feedbackList?.length === 0 ?
-                    <h2 className='font-bold text-xl text-gray-500'>No Feedback record found</h2>
+                    <h2 className='font-bold text-xl text-gray-500 col-span-full'>No Feedback record found</h2>
                     :
                     <>
                         {feedbackList.map((item, index) => (
-                            <Collapsible key={index} className='mt-7'>
-                                <CollapsibleTrigger className='p-2 bg-secondary rounded-lg my-2 text-left flex justify-between gap-7 w-full'>
-                                    {item.question} <ChevronsUpDown className='h-5 w-5' />
-                                </CollapsibleTrigger>
-                                <CollapsibleContent>
-                                    <div className='flex flex-col gap-2'>
-                                        <h2 className='text-red-500 p-2 border rounded-lg'><strong>Rating:</strong> {item.rating}</h2>
-                                        <h2 className='p-2 border rounded-lg bg-red-50 text-sm text-red-900'><strong>Your Answer: </strong>{item.userAnswer}</h2>
-                                        <h2 className='p-2 border rounded-lg bg-green-50 text-sm text-green-900'><strong>Correct Answer: </strong>{item.correctAnswer}</h2>
-                                        <h2 className='p-2 border rounded-lg bg-blue-50 text-sm text-primary'><strong>Feedback: </strong>{item.feedback}</h2>
-                                    </div>
-                                </CollapsibleContent>
-                            </Collapsible>
+                            <FeedbackCard key={index} item={item} index={index} />
                         ))}
                     </>}
             </div>
