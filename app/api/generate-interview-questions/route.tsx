@@ -14,16 +14,21 @@ export async function POST(req: NextRequest) {
 
     try {
         const contentType = req.headers.get("content-type") || "";
-        const user=await currentUser();
+        const user = await currentUser();
         let file: File | null = null;
         let jobTitle = "";
         let jobDescription = "";
-        const decision = await aj.protect(req, { requested: 5 }); // Deduct 5 tokens from the bucket
+        const decision = await aj.protect(req); // Check rate limit
         console.log("Arcjet decision", decision);
 
-        //@ts-ignore
-        if(decision?.reason?.remaining===0){
-            return NextResponse.json({ error: "No free tokens left. Try again after 24 Hours or upgrade your plan" }, { status: 429 });
+        if (decision.isDenied()) {
+            if (decision.reason.isRateLimit()) {
+                return NextResponse.json({ error: "Rate limit exceeded. You can only generate 2 interviews per day on the free plan." }, { status: 429 });
+            }
+            if (decision.reason.isBot()) {
+                return NextResponse.json({ error: "Bot detected." }, { status: 403 });
+            }
+            return NextResponse.json({ error: "Access Denied" }, { status: 403 });
         }
 
         // 1. Determine how to parse the request (JSON vs FormData)
@@ -54,7 +59,7 @@ export async function POST(req: NextRequest) {
             console.log("Sending to n8n with URL:", uploadPdf.url);
 
             // Call n8n
-            const response = await fetch('https://n8n-xc2y.onrender.com/webhook-test/get-interview-questions', {
+            const response = await fetch('https://n8n-xc2y.onrender.com/webhook/get-interview-questions', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -66,19 +71,25 @@ export async function POST(req: NextRequest) {
                 })
             });
 
+            if (!response.ok) {
+                console.error("n8n Webhook Failed", response.status, await response.text());
+                throw new Error("Failed to generate questions");
+            }
+
             const responseText = await response.text();
             let data;
             try {
                 data = JSON.parse(responseText);
             } catch (e) {
-                data = { error: "Invalid JSON response from n8n", raw: responseText };
+                console.error("Invalid JSON from n8n:", responseText);
+                throw new Error("Invalid response format from AI service");
             }
 
             // Return Final Response
             return NextResponse.json({
                 questions: data?.output?.[0]?.content?.[0]?.text?.interview_questions || [],
                 resumeUrl: uploadPdf.url,
-                status:200
+                status: 200
             });
         }
 
@@ -98,19 +109,24 @@ export async function POST(req: NextRequest) {
                 })
             });
 
+            if (!response.ok) {
+                console.error("n8n Webhook Failed", response.status, await response.text());
+                throw new Error("Failed to generate questions");
+            }
+
             const responseText = await response.text();
             let data;
             try {
                 data = JSON.parse(responseText);
             } catch (e) {
-                console.error("Failed to parse n8n response:", responseText);
-                data = {};
+                console.error("Invalid JSON from n8n:", responseText);
+                throw new Error("Invalid response format from AI service");
             }
 
             return NextResponse.json({
                 questions: data?.output?.[0]?.content?.[0]?.text?.interview_questions || [],
                 resumeUrl: null,
-                staus:200
+                status: 200
             });
         }
 
