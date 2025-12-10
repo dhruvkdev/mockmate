@@ -82,3 +82,16 @@ export const updateUserAnswerFeedback = mutation({
         return result;
     }
 });
+
+export const getUserInterviews = query({
+    args: {
+        userId: v.id('UserTable')
+    },
+    handler: async (ctx, args) => {
+        const interviews = await ctx.db.query('InterviewSessionTable')
+            .filter((q) => q.eq(q.field('userId'), args.userId))
+            .order('desc')
+            .collect();
+        return interviews;
+    }
+});

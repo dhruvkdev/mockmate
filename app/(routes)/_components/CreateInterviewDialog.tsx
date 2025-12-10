@@ -22,19 +22,19 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 function CreateInterviewDialog() {
 
-    const [formData, setFormData]=useState<any>();
-    const onHandleInputChange=(field:string, value:string)=>{
-        setFormData((prev: any)=>({
+    const [formData, setFormData] = useState<any>();
+    const onHandleInputChange = (field: string, value: string) => {
+        setFormData((prev: any) => ({
             ...prev,
-            [field]:value
+            [field]: value
         }))
     }
-    const [file, setFile]=useState<File|null>();
+    const [file, setFile] = useState<File | null>();
     const [loading, setLoading] = useState(false);
-    const saveInterviewQuestions=useMutation(api.Interview.saveInterviewQuestions);
-    const {userDetail, setUserDetail}=useContext(UserDetailcontext);
+    const saveInterviewQuestions = useMutation(api.Interview.saveInterviewQuestions);
+    const { userDetail, setUserDetail } = useContext(UserDetailcontext);
     const router = useRouter();
-    const onSubmit = async()=>{
+    const onSubmit = async () => {
         setLoading(true);
         const _formData = new FormData();
         if (file) {
@@ -45,21 +45,21 @@ function CreateInterviewDialog() {
         try {
             const res = await axios.post('api/generate-interview-questions', _formData);
             console.log(res.data);
-            if(res?.data?.status == 429){
+            if (res?.data?.status == 429) {
                 toast.warning(res.data.result);
-                return ;
+                return;
             }
             const response = await saveInterviewQuestions({
-                questions:res.data?.questions,
-                resumeUrl:res.data?.resumeUrl??'',
-                uid:userDetail?._id,
+                questions: res.data?.questions,
+                resumeUrl: res.data?.resumeUrl ?? '',
+                uid: userDetail?._id,
                 jobTitle: formData?.jobTitle,
-                jobDescription: formData?.jobDescription                
+                jobDescription: formData?.jobDescription
             });
             router.push(`/interview/${response}`);
         } catch (error) {
             console.log(error);
-        }finally{
+        } finally {
             setLoading(false);
         }
     }
@@ -84,7 +84,7 @@ function CreateInterviewDialog() {
                 </DialogHeader>
  
                 <DialogFooter>
-                    <DialogClose>
+                    <DialogClose asChild>
                         <Button variant={'ghost'}>Cancel</Button>
                     </DialogClose>
                     <Button onClick={onSubmit} disabled={loading || (!file && !formData?.jobDescription && !formData?.jobTitle)}>
