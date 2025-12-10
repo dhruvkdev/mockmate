@@ -14,7 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import ResumeUpload from './ResumeUpload'
 import JobDescription from './JobDescription'
 import axios from 'axios'
-import { Loader2Icon } from 'lucide-react'
+import { Briefcase, FileText, Loader2Icon } from 'lucide-react'
 import { useMutation } from 'convex/react'
 import { api } from '@/convex/_generated/api'
 import { UserDetailcontext } from '@/context/UserDetailContext'
@@ -70,16 +70,19 @@ function CreateInterviewDialog() {
             </DialogTrigger>
             <DialogContent className='min-w-3xl'>
                 <DialogHeader>
-                    <DialogTitle>Please submit the following details.</DialogTitle>
+                    <DialogTitle>Plese submit the following details.</DialogTitle>
+                      <Tabs defaultValue="resume-upload" className="w-full mt-2 ">
+                          <div className='flex items-center justify-center'>
+                            <TabsList className='bg-gray-200 rounded-xl p-1 mb-2'>
+                                <TabsTrigger value="resume-upload">Resume Upload</TabsTrigger>
+                                <TabsTrigger value="job-description">Job Description </TabsTrigger>
+                            </TabsList>
+                          </div>
+                            <TabsContent value="resume-upload"><ResumeUpload setFiles={(file:File)=>setFile(file)}/></TabsContent>
+                            <TabsContent value="job-description"><JobDescription onHandleInputChange={onHandleInputChange}/></TabsContent>
+                        </Tabs>
                 </DialogHeader>
-                <Tabs defaultValue="resume-upload" className="w-full mt-2">
-                    <TabsList>
-                        <TabsTrigger value="resume-upload">Resume Upload</TabsTrigger>
-                        <TabsTrigger value="job-description">Job Description </TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="resume-upload"><ResumeUpload setFiles={(file: File) => setFile(file)} /></TabsContent>
-                    <TabsContent value="job-description"><JobDescription onHandleInputChange={onHandleInputChange} /></TabsContent>
-                </Tabs>
+ 
                 <DialogFooter>
                     <DialogClose asChild>
                         <Button variant={'ghost'}>Cancel</Button>

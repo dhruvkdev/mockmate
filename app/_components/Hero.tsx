@@ -1,108 +1,145 @@
-"use client"
+import React from 'react';
+// Importing icons related to AI, Data, and Speech
+import { FaDatabase, FaMicrophoneAlt } from 'react-icons/fa';
+import { SiFramer, SiOpenai } from 'react-icons/si'; 
+import { GiArtificialIntelligence } from 'react-icons/gi'; // A good icon for Machine Learning/AI
 
-import { motion } from 'motion/react'
-import Link from 'next/link'
-import React from 'react'
+import { motion } from 'framer-motion';
+import Link from 'next/link';
 
-const Hero = () => {
-    return (
-        <div>
-            <div className="relative mx-auto my-10 flex max-w-7xl flex-col items-center justify-center">
-                <div className="absolute inset-y-0 left-0 h-full w-px bg-neutral-200/80 dark:bg-neutral-800/80">
-                    <div className="absolute top-0 h-40 w-px bg-linear-to-b from-transparent via-blue-500 to-transparent" />
-                </div>
-                <div className="absolute inset-y-0 right-0 h-full w-px bg-neutral-200/80 dark:bg-neutral-800/80">
-                    <div className="absolute h-40 w-px bg-linear-to-b from-transparent via-blue-500 to-transparent" />
-                </div>
-                <div className="absolute inset-x-0 bottom-0 h-px w-full bg-neutral-200/80 dark:bg-neutral-800/80">
-                    <div className="absolute mx-auto h-px w-40 bg-linear-to-r from-transparent via-blue-500 to-transparent" />
-                </div>
-                <div className="px-4 py-10 md:py-20">
-                    <h1 className="relative z-10 mx-auto max-w-4xl text-center text-2xl font-bold text-slate-700 md:text-4xl lg:text-7xl dark:text-slate-300">
-                        {"Ace Every Interview with AI-Powered Practice"
-                            .split(" ")
-                            .map((word, index) => (
-                                <motion.span
-                                    key={index}
-                                    initial={{ opacity: 0, filter: "blur(4px)", y: 10 }}
-                                    animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
-                                    transition={{
-                                        duration: 0.3,
-                                        delay: index * 0.1,
-                                        ease: "easeInOut",
-                                    }}
-                                    className="mr-2 inline-block"
-                                >
-                                    {word}
-                                </motion.span>
-                            ))}
-                    </h1>
-                    <motion.p
-                        initial={{
-                            opacity: 0,
-                        }}
-                        animate={{
-                            opacity: 1,
-                        }}
-                        transition={{
-                            duration: 0.3,
-                            delay: 0.8,
-                        }}
-                        className="relative z-10 mx-auto max-w-xl py-4 text-center text-lg font-normal text-black dark:text-gray-400"
-                    >
-                        Ace every interview with AI-powered practice that supports your growth every step of the way. From tailored questions to real-time coaching, we help you strengthen your skills and show up as your best self.
-                    </motion.p>
-                    <motion.div
-                        initial={{
-                            opacity: 0,
-                        }}
-                        animate={{
-                            opacity: 1,
-                        }}
-                        transition={{
-                            duration: 0.3,
-                            delay: 1,
-                        }}
-                        className="relative z-10 mt-8 flex flex-wrap items-center justify-center gap-4"
-                    >
-                        <Link href={'/dashboard'}>
-                        <button className="w-60 transform rounded-lg bg-black px-6 py-2 font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200">
-                            Explore Now
-                        </button>
-                        </Link>
-                        <button className="w-60 transform rounded-lg border border-gray-300 bg-white px-6 py-2 font-medium text-black transition-all duration-300 hover:-translate-y-0.5 hover:bg-gray-100 dark:border-gray-700 dark:bg-black dark:text-white dark:hover:bg-gray-900">
-                            Contact Support
-                        </button>
-                    </motion.div>
-                    <motion.div
-                        initial={{
-                            opacity: 0,
-                            y: 10,
-                        }}
-                        animate={{
-                            opacity: 1,
-                            y: 0,
-                        }}
-                        transition={{
-                            duration: 0.3,
-                            delay: 1.2,
-                        }}
-                        className="relative z-10 mt-20 rounded-3xl border border-neutral-200 bg-neutral-100 p-4 shadow-md dark:border-neutral-800 dark:bg-neutral-900"
-                    >
-                        <div className="w-full overflow-hidden rounded-xl border border-gray-300 dark:border-gray-700">
-                            <img
-                                src="https://assets.aceternity.com/pro/aceternity-landing.webp"
-                                alt="Landing page preview"
-                                className="aspect-video h-auto w-full object-cover"
-                                height={1000}
-                                width={1000}
-                            />
-                        </div>
-                    </motion.div>
-                </div>
+// NOTE: You'll need to install framer-motion and react-icons if you haven't already.
+
+const InterviewHeroAI = () => {
+  // Placeholder data for the 'Trusted by' section (kept the same)
+  const trustedUsers = [
+    { id: 1, avatarUrl: 'https://avatar.iran.liara.run/public', alt: 'Job seeker 1' },
+    { id: 2, avatarUrl: 'https://avatar.iran.liara.run/public', alt: 'Job seeker 2' },
+    { id: 3, avatarUrl: 'https://avatar.iran.liara.run/public', alt: 'Job seeker 3' },
+    { id: 4, avatarUrl: 'https://avatar.iran.liara.run/public', alt: 'Job seeker 4' },
+    { id: 5, avatarUrl: 'https://avatar.iran.liara.run/public', alt: 'Job seeker 5' },
+    { id: 6, avatarUrl: 'https://avatar.iran.liara.run/public', alt: 'Job seeker 6' },
+  ];
+
+  // REVISED: Data for AI/ML/Data technology concepts
+  const techConcepts = [
+    { name: 'AI/ML Core', icon: <GiArtificialIntelligence className="w-5 h-5 text-indigo-600" />, text: 'Machine Learning' },
+    { name: 'NLP/OpenAI', icon: <SiOpenai className="w-5 h-5 text-green-600" />, text: 'NLP Models' },
+    { name: 'Data Processing', icon: <FaDatabase className="w-5 h-5 text-red-600" />, text: 'Data Analytics' },
+    { name: 'Speech Recognition', icon: <FaMicrophoneAlt className="w-5 h-5 text-blue-600" />, text: 'Voice Analysis' },
+  ];
+
+  // Framer Motion variants (kept the same for the animation)
+  const containerVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: 0.1,
+        duration: 0.6,
+        staggerChildren: 0.2, 
+      },
+    },
+  };
+  
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+  };
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[60vh] py-20 px-4 bg-white">
+      <motion.header
+        className="text-center max-w-4xl mx-auto"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        {/* Headline */}
+        <motion.h1 
+          className="text-5xl lg:text-7xl font-extrabold text-gray-900 leading-tight mb-6"
+          variants={itemVariants}
+        >
+          Ace Every Interview with <br className="hidden sm:block" />
+          <span className="text-gray-900">AI-Powered Practice</span>
+        </motion.h1>
+
+        {/* Description */}
+        <motion.p 
+          className="text-lg md:text-xl text-gray-700 mb-10 max-w-3xl mx-auto"
+          variants={itemVariants}
+        >
+          Access <span className='text-black'>tilored questions</span>, get <span className='text-black'>real-time feedback</span> and our unique answers with our mock interview assistant. Your path to confidence and success starts here.
+        </motion.p>
+
+        {/* CTA Buttons */}
+        <motion.div 
+          className="flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-4 mb-20"
+          variants={itemVariants}
+        >
+            <Link href="/dashboard">
+          <button 
+            className="w-full sm:w-auto px-8 py-3 text-lg font-bold rounded-xl text-white bg-[#0F0A1F] hover:bg-[#201b30] transition duration-300 shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#0F0A1F]"
+            aria-label="Start your free mock interview now"
+          >
+            Start Free Mock Interview
+          </button>
+          </Link>
+          <button 
+            className="w-full sm:w-auto px-8 py-3 text-lg font-bold rounded-xl text-[#7C3AED] bg-white border-2 border-[#7C3AED] hover:bg-blue-50 transition duration-300 shadow-sm hover:shadow-md focus:outline-none focus:ring-4 focus:ring-[#7C3AED]"
+            aria-label="Learn more about the AI interview practice"
+          >
+            Learn More
+          </button>
+        </motion.div>
+      </motion.header>
+      
+      {/* --- Trust and Logo Bar --- */}
+      <div className="flex flex-col md:flex-row items-center justify-center space-y-6 md:space-y-0 md:space-x-16 pt-10 border-t border-gray-200 w-full max-w-6xl">
+        
+        {/* Trusted By Avatars (Unchanged) */}
+        <div className="flex flex-col items-center">
+          <p className="text-sm text-gray-500 mb-3">
+            Trusted by job seekers and professionals worldwide
+          </p>
+          <div className="flex -space-x-3">
+            {trustedUsers.map((user, index) => (
+              <div 
+                key={user.id} 
+                className="w-11 h-11 rounded-full bg-gray-300 border-4 border-white overflow-hidden shadow-md"
+                style={{ zIndex: trustedUsers.length - index }}
+              >
+                <img 
+                  src={user.avatarUrl} 
+                  alt={user.alt} 
+                  className="w-full h-full object-cover" 
+                  loading="lazy"
+                />
+              </div>
+            ))}
+            <div className="w-11 h-11 rounded-full bg-gray-100 border-4 border-white flex items-center justify-center text-gray-500 text-sm font-semibold shadow-md cursor-default">
+                +1k
             </div>
+          </div>
         </div>
-    )
-}
 
-export default Hero
+        {/* REVISED: AI/Tech Concepts Logos */}
+        <div className="flex items-center space-x-10 text-gray-800">
+          {techConcepts.map((tech) => (
+            <div 
+              key={tech.name} 
+              className="flex items-center space-x-2 opacity-90 hover:opacity-100 transition duration-300 cursor-default"
+              title={`Powered by ${tech.name}`}
+            >
+              {/* The icon now has a specific, branding-related color */}
+              {tech.icon}
+              <span className="text-base font-medium text-gray-700">{tech.text}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default InterviewHeroAI;
