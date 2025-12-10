@@ -37,11 +37,13 @@ function CreateInterviewDialog() {
     const onSubmit = async()=>{
         setLoading(true);
         const _formData = new FormData();
-        _formData.append('file', file??'');
+        if (file) {
+            _formData.append('file', file);
+        }
         _formData.append('jobDescription', formData?.jobDescription);
         _formData.append('jobTitle', formData?.jobTitle);
         try {
-            const res = await axios.post('api/generate-interview-questions', formData);
+            const res = await axios.post('api/generate-interview-questions', _formData);
             console.log(res.data);
             if(res?.data?.status == 429){
                 toast.warning(res.data.result);
