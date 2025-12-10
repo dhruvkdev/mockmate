@@ -22,19 +22,19 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 function CreateInterviewDialog() {
 
-    const [formData, setFormData]=useState<any>();
-    const onHandleInputChange=(field:string, value:string)=>{
-        setFormData((prev: any)=>({
+    const [formData, setFormData] = useState<any>();
+    const onHandleInputChange = (field: string, value: string) => {
+        setFormData((prev: any) => ({
             ...prev,
-            [field]:value
+            [field]: value
         }))
     }
-    const [file, setFile]=useState<File|null>();
+    const [file, setFile] = useState<File | null>();
     const [loading, setLoading] = useState(false);
-    const saveInterviewQuestions=useMutation(api.Interview.saveInterviewQuestions);
-    const {userDetail, setUserDetail}=useContext(UserDetailcontext);
+    const saveInterviewQuestions = useMutation(api.Interview.saveInterviewQuestions);
+    const { userDetail, setUserDetail } = useContext(UserDetailcontext);
     const router = useRouter();
-    const onSubmit = async()=>{
+    const onSubmit = async () => {
         setLoading(true);
         const _formData = new FormData();
         if (file) {
@@ -45,43 +45,41 @@ function CreateInterviewDialog() {
         try {
             const res = await axios.post('api/generate-interview-questions', _formData);
             console.log(res.data);
-            if(res?.data?.status == 429){
+            if (res?.data?.status == 429) {
                 toast.warning(res.data.result);
-                return ;
+                return;
             }
             const response = await saveInterviewQuestions({
-                questions:res.data?.questions,
-                resumeUrl:res.data?.resumeUrl??'',
-                uid:userDetail?._id,
+                questions: res.data?.questions,
+                resumeUrl: res.data?.resumeUrl ?? '',
+                uid: userDetail?._id,
                 jobTitle: formData?.jobTitle,
-                jobDescription: formData?.jobDescription                
+                jobDescription: formData?.jobDescription
             });
             router.push(`/interview/${response}`);
         } catch (error) {
             console.log(error);
-        }finally{
+        } finally {
             setLoading(false);
         }
     }
     return (
         <Dialog>
-            <DialogTrigger>
+            <DialogTrigger asChild>
                 <Button>+ Create Interview</Button>
             </DialogTrigger>
             <DialogContent className='min-w-3xl'>
                 <DialogHeader>
-                    <DialogTitle>Plese submit the following details.</DialogTitle>
-                    <DialogDescription>
-                        <Tabs defaultValue="resume-upload" className="w-full mt-2">
-                            <TabsList>
-                                <TabsTrigger value="resume-upload">Resume Upload</TabsTrigger>
-                                <TabsTrigger value="job-description">Job Description </TabsTrigger>
-                            </TabsList>
-                            <TabsContent value="resume-upload"><ResumeUpload setFiles={(file:File)=>setFile(file)}/></TabsContent>
-                            <TabsContent value="job-description"><JobDescription onHandleInputChange={onHandleInputChange}/></TabsContent>
-                        </Tabs>
-                    </DialogDescription>
+                    <DialogTitle>Please submit the following details.</DialogTitle>
                 </DialogHeader>
+                <Tabs defaultValue="resume-upload" className="w-full mt-2">
+                    <TabsList>
+                        <TabsTrigger value="resume-upload">Resume Upload</TabsTrigger>
+                        <TabsTrigger value="job-description">Job Description </TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="resume-upload"><ResumeUpload setFiles={(file: File) => setFile(file)} /></TabsContent>
+                    <TabsContent value="job-description"><JobDescription onHandleInputChange={onHandleInputChange} /></TabsContent>
+                </Tabs>
                 <DialogFooter>
                     <DialogClose>
                         <Button variant={'ghost'}>Cancel</Button>
