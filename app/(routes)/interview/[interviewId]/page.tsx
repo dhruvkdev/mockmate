@@ -24,7 +24,7 @@ function Interview() {
                 <div className='mt-10 bg-gray-50 p-4 rounded-lg' >
                     <h2 className='text-2xl font-semibold text-center mt-2 '>Want to send the interview link to some friend?</h2>
                     <div className='flex items-center gap-2 mt-5 w-full max-w-xl ' >
-                        <Input placeholder='Enter Email address' className='w-full' max-w-xl></Input>                        
+                        <Input placeholder='Enter Email address' className='w-full max-w-xl'></Input>                        
                         <Button><Send /></Button>                           
                     </div>
                 </div>
