@@ -129,10 +129,7 @@
 //     )
 // }
 
-// export default RecordAnswerSection
-
-
-"use client"
+// export default "use client"
 import React, { useEffect, useState, useRef } from 'react'
 import Image from 'next/image'
 import Webcam from 'react-webcam'
@@ -152,17 +149,26 @@ interface RecordAnswerSectionProps {
     userAnswer: string;
     setUserAnswer: React.Dispatch<React.SetStateAction<string>>;
     handleAnswerSave?: () => void;
+    readQuestion?: () => void;
 }
 
-function RecordAnswerSection({ mockInterviewQuestion, activeQuestionIndex, interviewData, userAnswer, setUserAnswer }: RecordAnswerSectionProps) {
+function RecordAnswerSection({ mockInterviewQuestion, activeQuestionIndex, interviewData, userAnswer, setUserAnswer, readQuestion }: RecordAnswerSectionProps) {
     const [isRecording, setIsRecording] = useState(false);
     const [isWebcamActive, setIsWebcamActive] = useState(true);
     const [wordCount, setWordCount] = useState(0);
 
     const recognitionRef = useRef<any>(null);
+    
+    // 1. FIX: Use a ref to store the latest readQuestion function
+    // This prevents the main useEffect from needing it as a dependency, stopping re-renders/crashes
+    const readQuestionRef = useRef(readQuestion);
+
+    // Update the ref whenever the prop changes
     useEffect(() => {
-    setWordCount(userAnswer.trim().split(/\s+/).filter(Boolean).length);
-}, [userAnswer]);
+        readQuestionRef.current = readQuestion;
+    }, [readQuestion]);
+
+    const COMMAND_PHRASES = ["repeat", "can you repeat", "say again", "pardon", "what was the question"];
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -187,29 +193,30 @@ function RecordAnswerSection({ mockInterviewQuestion, activeQuestionIndex, inter
                     }
 
                     if (finalTranscript) {
-                       setUserAnswer(prev => {
-                        const newAnswer = prev + " " + finalTranscript;
-                        return newAnswer;
-                    });
+                        const lowerTranscript = finalTranscript.toLowerCase().trim();
+                        
+                        // Check for commands
+                        const isCommand = COMMAND_PHRASES.some(phrase => lowerTranscript.includes(phrase));
 
+                        if (isCommand && readQuestionRef.current) {
+                            toast.info("Repeating question...");
+                            readQuestionRef.current(); // Call the function from ref
+                            return; 
+                        }
+
+                        setUserAnswer(prev => prev + " " + finalTranscript);
                     }
                 };
 
                 recognitionRef.current.onerror = (event: any) => {
                     console.error("Speech recognition error", event.error);
-                    if (event.error === 'not-allowed') {
-                        toast.error("Microphone access denied. Please allow microphone access.");
-                        setIsRecording(false);
-                    }
                 };
-            } else {
-                console.warn("Browser does not support speech recognition features.");
             }
         }
-    }, []);
+    }, []); // 2. FIX: Dependency array is now empty and stable!
 
     useEffect(() => {
-        setWordCount(userAnswer.trim().split(/\s+/).length);
+        setWordCount(userAnswer.trim().split(/\s+/).filter(Boolean).length);
     }, [userAnswer]);
 
     const StartStopRecording = async () => {
@@ -221,16 +228,17 @@ function RecordAnswerSection({ mockInterviewQuestion, activeQuestionIndex, inter
             // @ts-ignore
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
-                toast.error("Your browser does not support speech recognition. Please use Chrome or Edge.");
+                toast.error("Browser not supported. Use Chrome.");
                 return;
             }
 
             try {
                 recognitionRef.current?.start();
                 setIsRecording(true);
-                toast.success("Recording started... Speak now!");
+                toast.success("Listening...");
             } catch (error) {
-                toast.error("Failed to start recording");
+                // If it's already started, ignore error
+                setIsRecording(true);
             }
         }
     }
@@ -242,21 +250,20 @@ function RecordAnswerSection({ mockInterviewQuestion, activeQuestionIndex, inter
     return (
         <div className="w-full space-y-6">
             {/* Video Section */}
-            <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-gray-900 to-black">
+            <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-gray-900 to-black h-80">
                 <div className="absolute inset-0 bg-gradient-to-t from-primary/20 to-transparent z-10" />
                 
                 {isWebcamActive ? (
                     <Webcam
                         mirrored={true}
                         style={{
-                            height: 320,
+                            height: '100%',
                             width: '100%',
                             objectFit: 'cover',
                         }}
-                        className="w-full"
                     />
                 ) : (
-                    <div className="h-80 flex items-center justify-center">
+                    <div className="h-full flex items-center justify-center">
                         <div className="text-center">
                             <Video className="h-16 w-16 mx-auto text-gray-400 mb-4" />
                             <p className="text-gray-400">Camera is off</p>
@@ -284,84 +291,25 @@ function RecordAnswerSection({ mockInterviewQuestion, activeQuestionIndex, inter
             {/* Recording Controls */}
             <Card>
                 <CardContent className="p-6 space-y-6">
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                            <h3 className="font-semibold">Voice Recording</h3>
-                            <div className="flex items-center gap-3">
-                                <Badge variant={isRecording ? "destructive" : "outline"} className="gap-2">
-                                    <div className={`h-2 w-2 rounded-full ${isRecording ? 'animate-pulse bg-red-500' : 'bg-gray-400'}`} />
-                                    {isRecording ? 'RECORDING' : 'READY'}
-                                </Badge>
-                                <Badge variant="outline" className="gap-1">
-                                    {wordCount} words
-                                </Badge>
-                            </div>
-                        </div>
-
-                        <Button
-                            variant={isRecording ? "destructive" : "default"}
-                            size="lg"
-                            onClick={StartStopRecording}
-                            className="w-full h-14 text-lg font-medium transition-all duration-300 hover:scale-[1.02]"
-                        >
-                            {isRecording ? (
-                                <>
-                                    <StopCircle className="h-5 w-5 mr-2" />
-                                    Stop Recording
-                                </>
-                            ) : (
-                                <>
-                                    <Mic className="h-5 w-5 mr-2" />
-                                    Start Recording Answer
-                                </>
-                            )}
-                        </Button>
-
-                        {!('SpeechRecognition' in window) && !('webkitSpeechRecognition' in window) && (
-                            <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
-                                <div className="flex items-center gap-3">
-                                    <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-                                    <p className="text-sm text-amber-700 dark:text-amber-300">
-                                        Your browser has limited speech recognition support. For best results, use Chrome or Edge.
-                                    </p>
-                                </div>
-                            </div>
-                        )}
+                    <div className="flex items-center justify-between">
+                        <h3 className="font-semibold">Voice Recording</h3>
+                        <Badge variant={isRecording ? "destructive" : "outline"} className="gap-2">
+                             <div className={`h-2 w-2 rounded-full ${isRecording ? 'animate-pulse bg-red-500' : 'bg-gray-400'}`} />
+                             {isRecording ? 'LISTENING' : 'PAUSED'}
+                        </Badge>
                     </div>
 
-                    {/* Transcript Display */}
-                    <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                            <h3 className="font-semibold">Your Answer</h3>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setUserAnswer('')}
-                                className="h-8 text-xs"
-                                disabled={!userAnswer}
-                            >
-                                Clear
-                            </Button>
-                        </div>
-                        
-                        <div className="relative">
-                            <div className="bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-950 border rounded-xl p-5 min-h-[160px] max-h-[200px] overflow-y-auto shadow-inner">
-                                {userAnswer ? (
-                                    <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
-                                        {userAnswer}
-                                    </p>
-                                ) : (
-                                    <div className="h-full flex flex-col items-center justify-center text-gray-400">
-                                        <MicOff className="h-8 w-8 mb-3 opacity-50" />
-                                        <p className="text-center">Your transcribed answer will appear here as you speak...</p>
-                                        <p className="text-sm text-gray-500 mt-2">Click "Start Recording Answer" above</p>
-                                    </div>
-                                )}
-                            </div>
-                            <div className="absolute bottom-3 right-3 text-xs text-gray-500">
-                                Real-time transcription
-                            </div>
-                        </div>
+                    <Button
+                        variant={isRecording ? "destructive" : "default"}
+                        size="lg"
+                        onClick={StartStopRecording}
+                        className="w-full h-14"
+                    >
+                        {isRecording ? <><StopCircle className="mr-2"/> Stop Recording</> : <><Mic className="mr-2"/> Start Recording</>}
+                    </Button>
+
+                    <div className="bg-slate-50 p-4 rounded-lg min-h-[100px] max-h-[200px] overflow-y-auto border">
+                        {userAnswer || <span className="text-muted-foreground">Answer will appear here...</span>}
                     </div>
                 </CardContent>
             </Card>
@@ -370,6 +318,3 @@ function RecordAnswerSection({ mockInterviewQuestion, activeQuestionIndex, inter
 }
 
 export default RecordAnswerSection
-
-
-

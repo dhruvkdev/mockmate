@@ -152,9 +152,6 @@
 // }
 
 // export default StartInterview
-
-
-//   ---->>>>> 2 <<<<<-----
 "use client"
 import { useParams, useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react'
@@ -194,6 +191,17 @@ function StartInterview() {
         getInterviewQuestions();
     }, [interviewId]);
 
+    // Automatically read question when index changes
+    useEffect(() => {
+        if (interviewData && interviewData.interviewQuestions[activeQuestionIndex]) {
+            // Small delay to ensure smooth transition
+            const timer = setTimeout(() => {
+                textToSpeech(interviewData.interviewQuestions[activeQuestionIndex].question);
+            }, 500);
+            return () => clearTimeout(timer);
+        }
+    }, [activeQuestionIndex, interviewData]);
+
     const getInterviewQuestions = async () => {
         setIsLoading(true);
         try {
@@ -214,12 +222,22 @@ function StartInterview() {
     // Text to Speech
     const textToSpeech = (text: string) => {
         if ('speechSynthesis' in window) {
+            // Cancel any current speaking to avoid overlap
+            window.speechSynthesis.cancel();
+            
             const speech = new SpeechSynthesisUtterance(text);
             speech.rate = 1;
             speech.pitch = 1;
             window.speechSynthesis.speak(speech);
         } else {
             toast.error('Your browser does not support text to speech');
+        }
+    }
+
+    // Wrapper to speak current question (passed to child)
+    const speakCurrentQuestion = () => {
+        if (interviewData && interviewData.interviewQuestions[activeQuestionIndex]) {
+            textToSpeech(interviewData.interviewQuestions[activeQuestionIndex].question);
         }
     }
 
@@ -337,7 +355,7 @@ function StartInterview() {
                                         <h3 className="font-semibold text-black dark:text-black-400">Pro Tip</h3>
                                     </div>
                                     <p className="text-sm text-black dark:text-black-400">
-                                        Click "Record Answer" when ready. Speak clearly and concisely. After the interview, you'll receive AI-powered feedback comparing your answers with ideal responses.
+                                        Click "Record Answer" when ready. Speak clearly and concisely. You can say <strong>"Repeat the question"</strong> if you need to hear it again.
                                     </p>
                                 </div>
                             </div>
@@ -355,6 +373,7 @@ function StartInterview() {
                                         interviewData={interviewData}
                                         userAnswer={userAnswer}
                                         setUserAnswer={setUserAnswer}
+                                        readQuestion={speakCurrentQuestion} // Pass the function here
                                     />
                                 )}
                             </CardContent>
@@ -409,7 +428,3 @@ function StartInterview() {
 }
 
 export default StartInterview
-
-
-
-
