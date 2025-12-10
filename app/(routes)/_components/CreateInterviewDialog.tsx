@@ -50,7 +50,9 @@ function CreateInterviewDialog() {
             const response = await saveInterviewQuestions({
                 questions:res.data?.questions,
                 resumeUrl:res.data?.resumeUrl??'',
-                uid:userDetail?._id
+                uid:userDetail?._id,
+                jobTitle: formData?.jobTitle,
+                jobDescription: formData?.jobDescription                
             });
             router.push(`/interview/${response}`);
         } catch (error) {
