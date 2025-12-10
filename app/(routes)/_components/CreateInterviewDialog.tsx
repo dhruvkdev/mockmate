@@ -84,7 +84,7 @@ function CreateInterviewDialog() {
                 </DialogHeader>
  
                 <DialogFooter>
-                    <DialogClose>
+                    <DialogClose asChild>
                         <Button variant={'ghost'}>Cancel</Button>
                     </DialogClose>
                     <Button onClick={onSubmit} disabled={loading || (!file && !formData?.jobDescription && !formData?.jobTitle)}>
