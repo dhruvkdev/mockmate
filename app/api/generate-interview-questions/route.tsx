@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import ImageKit from "imagekit";
 import aj from "@/utils/arcjet";
-import { currentUser } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 
 var imagekit = new ImageKit({
     publicKey: process.env.IMAGEKIT_PUBLIC_KEY as string,
@@ -15,13 +15,16 @@ export async function POST(req: NextRequest) {
     try {
         const contentType = req.headers.get("content-type") || "";
         const user = await currentUser();
+        const {has} = await auth();
         let file: File | null = null;
         let jobTitle = "";
         let jobDescription = "";
         const decision = await aj.protect(req); // Check rate limit
         console.log("Arcjet decision", decision);
+        const isSubscribedPro = has({plan: 'pro'});
+        const isSubscribedCoaching = has({plan: 'coaching'});
 
-        if (decision.isDenied()) {
+        if (decision.isDenied() && !isSubscribedPro && !isSubscribedCoaching) {
             if (decision.reason.isRateLimit()) {
                 return NextResponse.json({ error: "Rate limit exceeded. You can only generate 2 interviews per day on the free plan." }, { status: 429 });
             }

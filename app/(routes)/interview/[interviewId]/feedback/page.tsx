@@ -107,7 +107,16 @@ function Feedback() {
         if (chartElement) {
             try {
                 // Ensure chart is fully visible before capture
-                const canvas = await html2canvas(chartElement, { scale: 2 });
+                const canvas = await html2canvas(chartElement, {
+                    scale: 2,
+                    ignoreElements: (element) => {
+                        // Skip elements that might have lab() colors
+                        const computedStyle = window.getComputedStyle(element);
+                        const bgColor = computedStyle.backgroundColor;
+                        const color = computedStyle.color;
+                        return bgColor.includes('lab') || color.includes('lab');
+                    }
+                });
                 const imgData = canvas.toDataURL('image/png');
                 const imgWidth = 180; // Margin 15 on each side
                 const imgHeight = (canvas.height * imgWidth) / canvas.width;
@@ -116,6 +125,7 @@ function Feedback() {
                 yPos += imgHeight + 10;
             } catch (err) {
                 console.error("Failed to capture chart", err);
+                // Continue without chart if capture fails
             }
         }
 
