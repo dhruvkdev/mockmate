@@ -5,7 +5,7 @@ import aj from "@/utils/arcjet";
 
 
 export async function GET(req: Request) {
-  const decision = await aj.protect(req, { requested: 5 }); // Deduct 5 tokens from the bucket
+  const decision = await aj.protect(req);
   console.log("Arcjet decision", decision);
 
   if (decision.isDenied()) {
