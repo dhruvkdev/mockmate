@@ -89,41 +89,74 @@ function RecordAnswerSection({ mockInterviewQuestion, activeQuestionIndex, inter
     // }, [userAnswer])
 
     return (
-        <div className='flex items-center justify-center flex-col'>
-            <div className='flex flex-col mt-20 justify-center items-center bg-black rounded-lg p-5'>
-                <Image src={'/webcam.png'} width={200} height={200} className='absolute' alt="Webcam Placeholder" />
-                <Webcam
-                    mirrored={true}
-                    style={{
-                        height: 300,
-                        width: '100%',
-                        zIndex: 10,
-                    }}
-                />
-            </div>
-            <div className='my-10 flex flex-col gap-5 items-center'>
-                <Button
-                    variant={isRecording ? "destructive" : "outline"}
-                    className='w-full'
-                    onClick={StartStopRecording}
-                >
-                    {isRecording ?
-                        <h2 className='flex gap-2 items-center'>
-                            <StopCircle /> Stop Recording
-                        </h2>
-                        :
-                        <h2 className='flex gap-2 items-center'>
-                            <Mic /> Record Answer
-                        </h2>
-                    }
-                </Button>
-
-                {/* Displaying the transcript for feedback */}
-                <div className='p-5 border rounded-lg w-full bg-slate-100 dark:bg-slate-800 h-32 overflow-y-scroll'>
-                    {userAnswer || <span className='text-gray-400'>Your answer will appear here...</span>}
+        <div className='w-full'>
+            <div className='bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden'>
+                {/* Webcam Section */}
+                <div className='relative bg-gray-900 aspect-video flex items-center justify-center'>
+                    <Image
+                        src={'/webcam.png'}
+                        width={120}
+                        height={120}
+                        className='absolute z-0 opacity-20'
+                        alt="Webcam Placeholder"
+                    />
+                    <Webcam
+                        mirrored={true}
+                        className='relative z-10 w-full h-full object-cover'
+                    />
+                    {isRecording && (
+                        <div className='absolute top-4 right-4 z-20 bg-red-500 text-white px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-2 animate-pulse'>
+                            <div className='w-2 h-2 bg-white rounded-full'></div>
+                            Recording
+                        </div>
+                    )}
                 </div>
 
-                {/* <Button onClick={()=>console.log(userAnswer)}>Show User Answer</Button> */}
+                {/* Controls Section */}
+                <div className='p-6 space-y-4'>
+                    {/* Record Button */}
+                    <Button
+                        variant={isRecording ? "destructive" : "default"}
+                        className={`w-full h-12 font-semibold ${!isRecording && 'bg-gray-900 hover:bg-black'}`}
+                        onClick={StartStopRecording}
+                    >
+                        {isRecording ? (
+                            <>
+                                <StopCircle className='w-5 h-5 mr-2' />
+                                Stop Recording
+                            </>
+                        ) : (
+                            <>
+                                <Mic className='w-5 h-5 mr-2' />
+                                Record Answer
+                            </>
+                        )}
+                    </Button>
+
+                    {/* Transcript Display */}
+                    <div className='space-y-2'>
+                        <label className='text-sm font-semibold text-gray-700'>Your Answer</label>
+                        <div className='relative'>
+                            <textarea
+                                value={userAnswer}
+                                onChange={(e) => setUserAnswer(e.target.value)}
+                                placeholder='Your answer will appear here as you speak...'
+                                className='w-full h-40 p-4 border border-gray-200 rounded-lg bg-gray-50 text-gray-900 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent'
+                            />
+                            {userAnswer && (
+                                <div className='absolute bottom-3 right-3 text-xs text-gray-400'>
+                                    {userAnswer.split(' ').filter(w => w).length} words
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Helper Text */}
+                    <p className='text-xs text-gray-500 flex items-center gap-1'>
+                        <Mic className='w-3 h-3' />
+                        Click record and start speaking. Your answer will be transcribed automatically.
+                    </p>
+                </div>
             </div>
         </div>
     )

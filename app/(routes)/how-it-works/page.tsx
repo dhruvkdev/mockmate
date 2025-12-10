@@ -45,7 +45,7 @@ function HowItWorks() {
                 </p>
             </div>
 
-            <div className='max-w-4xl mx-auto space-y-12'>
+            <div className=' flex flex-col items-center max-w-4xl mx-auto space-y-12'>
                 {steps.map((step, index) => {
                     const Icon = step.icon
                     return (
@@ -54,14 +54,14 @@ function HowItWorks() {
                             className='flex gap-8 items-start bg-white p-8 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow'
                         >
                             <div className='flex-shrink-0'>
-                                <div className='w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center'>
-                                    <Icon className='w-8 h-8 text-purple-600' />
+                                <div className='w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center'>
+                                    <Icon className='w-8 h-8 text-gray-900' />
                                 </div>
                             </div>
 
                             <div className='flex-1'>
                                 <div className='flex items-center gap-3 mb-3'>
-                                    <span className='text-sm font-bold text-purple-600 bg-purple-50 px-3 py-1 rounded-full'>
+                                    <span className='text-sm font-bold text-gray-900 bg-gray-100 px-3 py-1 rounded-full'>
                                         Step {step.number}
                                     </span>
                                 </div>
@@ -82,7 +82,7 @@ function HowItWorks() {
             <div className='text-center mt-16 space-y-4'>
                 <Button
                     size="lg"
-                    className='bg-purple-600 hover:bg-purple-700'
+                    className='bg-gray-900 hover:bg-black'
                     onClick={() => router.push('/dashboard')}
                 >
                     Start Your First Mock Interview
