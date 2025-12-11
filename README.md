@@ -5,6 +5,8 @@ MockMate is a full-stack, AI-integrated application that allows users to practic
 Live Demo:
 🔗 https://mockmate-pokh.vercel.app/
 
+> **Note:** You can create up to **2 interviews per day**. After that, you can upgrade to the **Pro plan for free** (currently for testing/development purposes).
+
 ### Round 2 Status (Functional Prototype - 80% Complete)
 
 * **Core Functionality Working:** The end-to-end flow from user input (Resume/JD) to final structured feedback is complete.
