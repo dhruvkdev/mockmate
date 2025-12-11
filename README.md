@@ -1,36 +1,141 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MockMate — AI-Powered Interview Simulator
 
-## Getting Started
+MockMate is a full-stack, AI-integrated application that allows users to practice realistic job interviews using TTS-based simulation and receive structured AI feedback.
 
-First, run the development server:
+### Round 2 Status (Functional Prototype - 80% Complete)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+* **Core Functionality Working:** The end-to-end flow from user input (Resume/JD) to final structured feedback is complete.
+* **Realistic Simulation (TTS):** The interview simulation is currently implemented using sequential question display and **Text-to-Speech (TTS)** audio.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 2. Architecture Overview
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+MockMate employs a decoupled, serverless architecture that separates the user interface and authentication from the complex AI processing.
 
-## Learn More
+| Layer | Technology | Purpose |
+| :--- | :--- | :--- |
+| **Frontend / API Gateway** | Next.js 14, TypeScript, Tailwind | UI rendering, API routing, and orchestration. |
+| **Database / BaaS** | Convex | Real-time database storing users, interview records, questions, and final feedback. |
+| **AI Workflow Engine** | n8n | Executes multi-step AI pipelines for generating questions and analyzing transcripts. |
+| **Authentication** | Clerk | Handles Auth, User Sessions, and integrated Subscription Billing. |
+| **Security + Utils** | ArcJet, ImageKit | Rate limiting enforcement and cloud storage for resume files. |
 
-To learn more about Next.js, take a look at the following resources:
+For detailed documentation, see:
+* [**📁 docs/01\_Architecture\_Overview.md**](docs/01_Architecture_Overview.md)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 3. List of Dependencies
 
-## Deploy on Vercel
+| Category | Packages |
+| :--- | :--- |
+| **Framework** | `next`, `react`, `react-dom` |
+| **Database** | `convex`, `@convex-dev/react`, `axios` |
+| **Auth + UI** | `@clerk/nextjs`, `tailwindcss`, `shadcn/ui` |
+| **Security/Utils** | `@arcjet/next`, `arcjet`, `imagekit` |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 4. Setup Instructions
+
+### Prerequisites
+
+* Node.js (v18+) and npm/yarn/pnpm.
+
+
+## 5. How to Run Locally
+
+### Minimal Run (Evaluation)
+
+This method quickly runs the frontend, connecting to the pre-configured deployed Convex instance.
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/dhruvkdev/mockmate.git
+    cd mockmate
+    ```
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
+3.  **Setup Environment:**
+    ```bash
+    cp .env.example .env.local
+    # Paste test keys
+    ```
+4.  **Start the dev server:**
+    ```bash
+    npm run dev
+    ```
+App runs at: 👉 **http://localhost:3000**
+
+### Full Local Development Setup (Recommended for Active Development)
+
+To actively develop and test changes in the Convex backend functions, you must run the local Convex server alongside the Next.js app.
+
+1.  **Terminal 1 (Convex Backend):** Run the Convex development server. This syncs local changes in `convex/*.ts` to a local database instance.
+
+    ```bash
+    npx convex dev
+    ```
+
+2.  **Terminal 2 (Next.js Frontend):** Run the Next.js application (as above).
+
+    ```bash
+    npm run dev
+    ```
+By running both, all frontend calls hit your local Convex development environment.
+
+---
+
+## 6. APIs or Endpoints
+
+### Next.js API Routes (Orchestration)
+
+| Endpoint | Method | Purpose |
+| :--- | :--- | :--- |
+| `/api/generate-interview-questions` | `POST` | Triggers the AI Q\&A workflow via n8n, handling ImageKit upload and ArcJet limits. |
+| `/api/generate-feedback` | `POST` | Sends the recorded interview transcript to the n8n workflow for final scoring and analysis. |
+
+### Convex Backend Functions (Data Layer)
+
+| Function | Type | Description |
+| :--- | :--- | :--- |
+| `Interview:saveInterviewQuestions` | Mutation | Saves the generated questions and metadata to the database. |
+| `Interview:updateFeedback` | Mutation | Stores the final structured feedback (rating, suggestions). |
+
+---
+
+## 7. Example Inputs/Outputs
+
+### Request to generate questions (Job Description Path)
+
+```json
+{
+  "jobTitle": "Senior React Developer",
+  "jobDescription": "Must have 5+ years experience building scalable React apps with Next.js and TypeScript."
+}
+Output Example (AI Feedback - Stored in Convex feedback field)
+JSON
+
+{
+  "feedback": {
+    "rating": 7.8,
+    "feedback": "The candidate was technically accurate regarding state management but lacked depth in explaining server-side rendering benefits in Next.js. Speaking pace was too fast in the final minute.",
+    "suggestion": [
+      "Practice articulating the difference between Client and Server Components.",
+      "Maintain a slower, more deliberate speaking pace under pressure."
+    ]
+  }
+}
+8. Deployment (Optional but Recommended)
+Live Demo:
+🔗 https://mockmate-pokh.vercel.app/
+
+9. Contributors
+
+Dhruv Kumar
+Swarup Das
+Anurag Sharma
+Nibir Deka
