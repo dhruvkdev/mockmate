@@ -256,7 +256,7 @@ By running both, all frontend calls hit your local Convex development environmen
 
 ---
 
-## 7. Deployment (Optional but Recommended)
+## 7. Deployment 
 Live Demo:
 🔗 https://mockmate-pokh.vercel.app/
 
