@@ -1,6 +1,9 @@
-# MockMate — AI-Powered Interview Simulator
+# MockMate — AI Powered Interview Simulator
 
 MockMate is a full-stack, AI-integrated application that allows users to practice realistic job interviews using TTS-based simulation and receive structured AI feedback.
+
+Live Demo:
+🔗 https://mockmate-pokh.vercel.app/
 
 ### Round 2 Status (Functional Prototype - 80% Complete)
 
@@ -107,11 +110,7 @@ By running both, all frontend calls hit your local Convex development environmen
 
 ---
 
-## 7. Deployment 
-Live Demo:
-🔗 https://mockmate-pokh.vercel.app/
-
-## 8. Contributors
+## 7. Contributors
 Dhruv Kumar
 
 Swarup Das
