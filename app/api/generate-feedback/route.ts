@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
 
         // Call n8n
         // This URL should be set in environment variables
-        const n8nUrl = process.env.N8N_FEEDBACK_WEBHOOK_URL || 'https://n8n-xc2y.onrender.com/webhook/get-interview-questions-feedback';
+        const n8nUrl = `${process.env.N8N_WEBHOOK_URL}/webhook/get-interview-questions-feedback`;
         // Note: User mentioned 'webhook/get-interview-questions-feedback' or similar in testing? 
         // Actually user said: "My webhook expects..." and "gives output...". 
         // User didn't specify URL, but previously used 'https://n8n-xc2y.onrender.com/webhook/get-interview-questions'.

@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
             console.log("Sending to n8n with URL:", uploadPdf.url);
 
             // Call n8n
-            const response = await fetch('https://n8n-xc2y.onrender.com/webhook/get-interview-questions', {
+            const response = await fetch(`${process.env.N8N_WEBHOOK_URL}/webhook/get-interview-questions`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -100,7 +100,7 @@ export async function POST(req: NextRequest) {
         else {
             console.log("Sending text-only request to n8n");
 
-            const response = await fetch('https://n8n-xc2y.onrender.com/webhook/get-interview-questions', {
+            const response = await fetch(`${process.env.N8N_WEBHOOK_URL}/webhook/get-interview-questions`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
